@@ -3,10 +3,10 @@ import std.conv : to;
 import std.range : iota;
 import std.array : array;
 import std.range : front;
-import std.algorithm : map, min, multiSort, splitter;
+import std.algorithm : map, min, multiSort;
 import std.parallelism : taskPool;
 import std.mmfile : MmFile;
-import std.string : lineSplitter;
+import std.string : indexOf, lastIndexOf, lineSplitter;
 import core.memory : GC;
 //import std.datetime : Clock;
 
@@ -99,12 +99,11 @@ Dataset parseChunk(string chunk)
 
     foreach(immutable string line; chunk.lineSplitter())
     {
-        auto parts = line.splitter(",");
-        immutable string city = parts.front();
-        parts.popFront();
-        immutable string product = parts.front();
-        parts.popFront();
-        immutable double price = line[city.length + 1 + product.length + 1 .. $].parseDouble();
+        size_t firstComma = line.indexOf(',');
+        size_t lastComma = line.lastIndexOf(',');
+        immutable string city = line[0 .. firstComma];
+        immutable string product = line[firstComma + 1 .. lastComma];
+        immutable double price = line[lastComma + 1 .. $].parseDouble();
 
         size_t cityHash = hashCity(city);
         size_t productHash = hashProduct(product);
